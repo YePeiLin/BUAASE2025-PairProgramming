@@ -15,8 +15,10 @@ const enum Directions {
 export function greedy_snake_move_barriers(
   snake: Int32Array,
   food: Int32Array,
-  barriers: Int32Array
+  barriers: Int32Array | null = null
 ): i32 {
+  if (!barriers) barriers = new Int32Array(0); // 确保 barriers 不是 null
+
   // 可达性预检
   if (!isReachable(snake, food, barriers)) return -1;
 
@@ -51,7 +53,7 @@ export function greedy_snake_move_barriers(
 function canMove(
   snake: Int32Array,
   direction: i32,
-  barriers: Int32Array = new Int32Array(0) // 默认空数组
+  barriers: Int32Array
 ): bool {
   let x = snake[0], y = snake[1];
 
@@ -82,7 +84,7 @@ function checkBodyCollision(x: i32, y: i32, snake: Int32Array): bool {
 }
 
 function checkBarriers(x: i32, y: i32, barriers: Int32Array): bool {
-  for (let i = 0; i < 24; i += 2) {
+  for (let i = 0; i < barriers.length; i += 2) {
     if (x == barriers[i] && y == barriers[i+1]) return false;
   }
   return true;
@@ -117,7 +119,7 @@ function isReachable(snake: Int32Array, food: Int32Array, barriers: Int32Array):
       // 快速检查
       if (!checkBoundary(nx, ny)) continue;
       if (!checkBarriers(nx, ny, barriers)) continue;
-      if (visited[(nx-1)*8 + (ny-1)]) continue;
+      if (visited[(nx-1)*8 + (ny-1)]) continue; // * 8 可以优化吗
 
       // 到达检测
       if (nx == food[0] && ny == food[1]) return true;
