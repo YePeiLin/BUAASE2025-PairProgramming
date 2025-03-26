@@ -8,76 +8,62 @@ export function add(a: i32, b: i32): i32 {
 ////////////////////
 ////////////////////
 
+// 方向常量枚举
+const Directions = {
+  UP: 0,    // 上 (+y)
+  LEFT: 1,  // 左 (-x)
+  DOWN: 2,  // 下 (-y)
+  RIGHT: 3  // 右 (+x)
+} as const;
+
 export function greedy_snake_move(snake: Int32Array, food: Int32Array): i32 {
   const headX = snake[0];
   const headY = snake[1];
   const foodX = food[0];
   const foodY = food[1];
 
-  // 优先考虑x轴方向移动
-  if (headX < foodX && canMoveRight(snake)) {
-    return 1; // 右
-  } else if (headX > foodX && canMoveLeft(snake)) {
-    return 3; // 左
+  // 优先x轴方向
+  if (headX < foodX && canMove(snake, Directions.RIGHT)) {
+    return Directions.RIGHT;
+  }
+  if (headX > foodX && canMove(snake, Directions.LEFT)) {
+    return Directions.LEFT;
   }
 
-  // 其次考虑y轴方向移动
-  if (headY < foodY && canMoveUp(snake)) {
-    return 0; // 上
-  } else if (headY > foodY && canMoveDown(snake)) {
-    return 2; // 下
+  // 其次y轴方向
+  if (headY < foodY && canMove(snake, Directions.UP)) {
+    return Directions.UP;
+  }
+  if (headY > foodY && canMove(snake, Directions.DOWN)) {
+    return Directions.DOWN;
   }
 
-  // 如果直接移动不可行，尝试其他安全方向
-  if (canMoveUp(snake)) return 0;
-  if (canMoveRight(snake)) return 1;
-  if (canMoveDown(snake)) return 2;
-  if (canMoveLeft(snake)) return 3;
+  // 安全方向兜底
+  if (canMove(snake, Directions.UP)) return Directions.UP;
+  if (canMove(snake, Directions.RIGHT)) return Directions.RIGHT;
+  if (canMove(snake, Directions.DOWN)) return Directions.DOWN;
+  if (canMove(snake, Directions.LEFT)) return Directions.LEFT;
 
-  // 实在无路可走（理论上不应该发生）
-  return 0; // 默认向上
+  return Directions.UP; // 默认安全方向
 }
 
-// 辅助函数：检查是否可以向上移动
-function canMoveUp(snake: Int32Array): bool {
-  const newHeadX = snake[0];
-  const newHeadY = snake[1] + 1;
-  return isValidMove(newHeadX, newHeadY, snake);
-}
+// 统一移动检查函数
+function canMove(snake: Int32Array, direction: i32): bool {
+  let x = snake[0], y = snake[1];
 
-// 辅助函数：检查是否可以向右移动
-function canMoveRight(snake: Int32Array): bool {
-  const newHeadX = snake[0] + 1;
-  const newHeadY = snake[1];
-  return isValidMove(newHeadX, newHeadY, snake);
-}
-
-// 辅助函数：检查是否可以向下移动
-function canMoveDown(snake: Int32Array): bool {
-  const newHeadX = snake[0];
-  const newHeadY = snake[1] - 1;
-  return isValidMove(newHeadX, newHeadY, snake);
-}
-
-// 辅助函数：检查是否可以向左移动
-function canMoveLeft(snake: Int32Array): bool {
-  const newHeadX = snake[0] - 1;
-  const newHeadY = snake[1];
-  return isValidMove(newHeadX, newHeadY, snake);
-}
-
-// 辅助函数：检查移动是否有效
-function isValidMove(x: i32, y: i32, snake: Int32Array): bool {
-  // 检查是否超出边界
-  if (x < 1 || x > 8 || y < 1 || y > 8) {
-    return false;
+  switch (direction) {
+    case Directions.UP:    y += 1; break;
+    case Directions.DOWN:  y -= 1; break;
+    case Directions.LEFT:  x -= 1; break;
+    case Directions.RIGHT: x += 1; break;
   }
 
-  // 检查是否会撞到自己身体（跳过蛇尾，因为蛇移动后尾部会离开原位置）
-  for (let i = 2; i < 6; i += 2) { // 只检查第2、3节身体
-    if (x === snake[i] && y === snake[i+1]) {
-      return false;
-    }
+  // 边界检查
+  if (x < 1 || x > 8 || y < 1 || y > 8) return false;
+
+  // 碰撞检查（跳过蛇尾）
+  for (let i = 2; i < 6; i += 2) {
+    if (x == snake[i] && y == snake[i+1]) return false;
   }
 
   return true;
