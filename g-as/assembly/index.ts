@@ -9,12 +9,12 @@ export function add(a: i32, b: i32): i32 {
 ////////////////////
 
 // 方向常量枚举
-const Directions = {
-  UP: 0,    // 上 (+y)
-  LEFT: 1,  // 左 (-x)
-  DOWN: 2,  // 下 (-y)
-  RIGHT: 3  // 右 (+x)
-} as const;
+const enum Directions {
+  UP = 0,
+  LEFT = 1,
+  DOWN = 2,
+  RIGHT = 3
+}
 
 export function greedy_snake_move(snake: Int32Array, food: Int32Array): i32 {
   const headX = snake[0];
